@@ -65,9 +65,14 @@
     <!-- Librería de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+   
+     
+        <!-- Librería de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
-        // 1. Configuración de Supabase (las mismas credenciales)
-        const SUPABASE_URL = "TU_PROJECT_URL_AQUI";
+        // 1. Configuración de Supabase con tu Project URL
+        const SUPABASE_URL = "https://rgusvkgxpxoebvyiqewr.supabase.co";
         const SUPABASE_KEY = "TU_ANON_PUBLIC_KEY_AQUI";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -75,23 +80,19 @@
 
         // 2. Al cargar la página, verificar sesión y mostrar fecha
         window.addEventListener("DOMContentLoaded", async () => {
-            // Mostrar fecha actual formateada
             const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById("fechaActual").innerText = new Date().toLocaleDateString('es-ES', opciones);
 
-            // Obtener el usuario logueado
             const { data: { user }, error } = await supabase.auth.getUser();
 
             if (error || !user) {
-                // Si no hay sesión, regresar al login
                 window.location.href = "index.html";
                 return;
             }
 
             usuarioActual = user;
 
-            // Buscar el nombre del usuario en la tabla 'usuarios'
-            const { data: perfil, error: perfilError } = await supabase
+            const { data: perfil } = await supabase
                 .from("usuarios")
                 .select("nombre")
                 .eq("id", user.id)
@@ -112,13 +113,12 @@
             btn.disabled = true;
             btn.innerText = "Registrando...";
 
-            // Insertar en la tabla asistencias
             const { error } = await supabase
                 .from("asistencias")
                 .insert([{ usuario_id: usuarioActual.id }]);
 
             if (error) {
-                if (error.code === '23505') { // Código de duplicado si agregaste restricción única
+                if (error.code === '23505') {
                     alert("Ya habías registrado tu asistencia el día de hoy.");
                 } else {
                     alert("Error al registrar: " + error.message);
